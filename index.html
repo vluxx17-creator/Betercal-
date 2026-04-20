@@ -3,154 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SEARCHHEMS | OSINT</title>
+    <title>SEARCHHEMS PREMIUM</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono&display=swap');
 
         body {
-            margin: 0; background: #020205; color: #fff;
+            margin: 0;
+            background: #000;
+            color: #00f3ff;
             font-family: 'Orbitron', sans-serif;
-            -webkit-font-smoothing: antialiased;
+            padding: 15px;
+            overflow-x: hidden;
         }
 
-        /* Переливающийся фон */
-        .bg-glow {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% 50%, #101025 0%, #020205 100%);
-            z-index: -1;
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #00f3ff;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px #00f3ff;
         }
-
-        header {
-            padding: 20px; background: rgba(0,0,0,0.8);
-            border-bottom: 1px solid #00f3ff;
-            display: flex; justify-content: space-between; align-items: center;
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-        }
-
-        .logo { color: #00f3ff; font-weight: bold; text-shadow: 0 0 10px #00f3ff; }
 
         .card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(0,243,255,0.1);
-            border-radius: 12px; padding: 20px; margin: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #333;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            text-align: center;
             transition: 0.3s;
-        }
-        .card:active { transform: scale(0.97); background: rgba(0,243,255,0.05); }
-        .card h3 { margin: 0 0 10px 0; color: #00f3ff; font-size: 1.1rem; }
-        .card p { margin: 0; color: #888; font-size: 0.85rem; line-height: 1.4; }
-
-        /* Окно отчета на весь экран */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 1000; flex-direction: column;
-        }
-        .modal.active { display: flex; }
-
-        .modal-header {
-            padding: 20px; border-bottom: 1px solid #333;
-            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer;
         }
 
-        .terminal {
-            flex-grow: 1; padding: 20px; overflow-y: auto;
-            font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
-            color: #00ff00; line-height: 1.6; background: #050508;
+        .card:active {
+            transform: scale(0.95);
+            background: rgba(0, 243, 255, 0.1);
+            border-color: #00f3ff;
         }
 
-        .btn-box { padding: 20px; border-top: 1px solid #333; display: flex; gap: 10px; }
-        .btn {
-            flex: 1; padding: 15px; border: none; border-radius: 8px;
-            font-family: 'Orbitron', sans-serif; font-weight: bold; font-size: 0.8rem;
+        /* Окно терминала */
+        #resultBox {
+            display: none;
+            background: #050505;
+            border: 1px solid #00f3ff;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: #0f0;
+            white-space: pre-wrap;
+            margin-top: 10px;
+            line-height: 1.5;
         }
-        .btn-blue { background: #00f3ff; color: #000; }
-        .btn-red { background: transparent; border: 1px solid #ff3366; color: #ff3366; }
+
+        #resultBox.active {
+            display: block;
+        }
+
+        button.back-btn {
+            display: none;
+            width: 100%;
+            padding: 15px;
+            background: #ff3366;
+            color: #fff;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .status-bar {
+            font-size: 10px;
+            color: #555;
+            text-align: center;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <div class="bg-glow"></div>
+
+    <div class="header">
+        <h1>SEARCHHEMS PRO</h1>
+    </div>
+
+    <div id="menu">
+        <div class="card" onclick="startSearch('ip')">🌐 МОДУЛЬ: IP-АДРЕС</div>
+        <div class="card" onclick="startSearch('vk')">🟦 МОДУЛЬ: VK / СОЦСЕТИ</div>
+        <div class="card" onclick="startSearch('phone')">📱 МОДУЛЬ: НОМЕР ТЕЛЕФОНА</div>
+    </div>
+
+    <div id="resultBox"></div>
     
-    <header>
-        <div class="logo">SEARCHHEMS v3.0</div>
-        <div onclick="openModal('regModal')" style="font-size: 1.5rem;">☰</div>
-    </header>
+    <button id="backBtn" class="back-btn" onclick="location.reload()">НОВЫЙ ПОИСК</button>
 
-    <main>
-        <div class="card" onclick="runSearch('ip')">
-            <h3>🌐 МОДУЛЬ: IP-ADRESS</h3>
-            <p>Глубокий анализ сети, провайдера и геолокации.</p>
-        </div>
-        <div class="card" onclick="runSearch('vk')">
-            <h3>🟦 МОДУЛЬ: VK.COM</h3>
-            <p>Поиск скрытых данных, связей и утечек по ID/Нику.</p>
-        </div>
-        <div class="card" onclick="runSearch('global')">
-            <h3>⚙️ ГЛОБАЛЬНЫЙ ПРОБИВ</h3>
-            <p>Поиск по всем соцсетям и базам DarkWeb данных.</p>
-        </div>
-    </main>
-
-    <div class="modal" id="reportModal">
-        <div class="modal-header">
-            <div style="color:#00f3ff">REPORT_GENERATOR</div>
-            <div onclick="closeModal('reportModal')" style="color:#ff3366">ЗАКРЫТЬ</div>
-        </div>
-        <div class="terminal" id="termOutput"></div>
-        <div class="btn-box">
-            <button class="btn btn-blue">СКАЧАТЬ PDF</button>
-            <button class="btn btn-red">JSON</button>
-        </div>
-    </div>
-
-    <div class="modal" id="regModal">
-        <div class="modal-header">
-            <div>РЕГИСТРАЦИЯ</div>
-            <div onclick="closeModal('regModal')">✕</div>
-        </div>
-        <div style="padding: 20px;">
-            <input type="text" placeholder="Логин" style="width:100%; padding:15px; margin-bottom:10px; background:#111; border:1px solid #333; color:#fff;">
-            <input type="text" placeholder="@username" style="width:100%; padding:15px; margin-bottom:20px; background:#111; border:1px solid #333; color:#fff;">
-            <button class="btn btn-blue" style="width:100%;">СОЗДАТЬ АККАУНТ</button>
-        </div>
-    </div>
+    <div class="status-bar">СВЯЗЬ С СЕРВЕРОМ: УСТАНОВЛЕНА | V3.0</div>
 
     <script>
-        // ТВОЯ ССЫЛКА ОТ RENDER!
-        const SERVER_URL = "https://proabajaaa.onrender.com";
+        // Твоя активная ссылка Render
+        const SERVER_URL = "https://betercal.onrender.com";
 
-        async function runSearch(type) {
-            const query = prompt("Введите цель (Ник, IP или ID):");
+        async function startSearch(type) {
+            const query = prompt("Введите данные для анализа (IP, ID или Номер):");
             if (!query) return;
 
-            openModal('reportModal');
-            const output = document.getElementById('termOutput');
-            output.innerHTML = "[SYS] Инициализация модулей...\n[SYS] Подключение к серверам OSINT...\n[SYS] Запуск поиска по цели: " + query + "\n\n";
+            // Прячем меню, показываем терминал
+            document.getElementById('menu').style.display = 'none';
+            const term = document.getElementById('resultBox');
+            term.classList.add('active');
+            term.innerHTML = "> Инициализация протоколов...\n> Подключение к удаленному серверу...\n> Сбор данных по цели: " + query + "\n\n";
 
             try {
                 const response = await fetch(`${SERVER_URL}/api/search`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({ type: type, query: query })
                 });
+
+                if (!response.ok) throw new Error('Ошибка сервера');
+
                 const data = await response.json();
                 
-                // Эффект печатающегося текста для крутости
+                // Эффект постепенного появления текста
+                term.innerHTML = "";
                 let i = 0;
-                const text = data.report;
-                output.innerHTML = "";
-                const timer = setInterval(() => {
-                    output.innerHTML += text[i];
-                    i++;
-                    if (i >= text.length) clearInterval(timer);
-                    output.scrollTop = output.scrollHeight;
-                }, 5);
+                const fullText = data.report;
+                
+                function typeWriter() {
+                    if (i < fullText.length) {
+                        term.innerHTML += fullText.charAt(i);
+                        i++;
+                        term.scrollTop = term.scrollHeight; // Скроллим вниз
+                        setTimeout(typeWriter, 5); // Скорость печати
+                    } else {
+                        document.getElementById('backBtn').style.display = 'block';
+                    }
+                }
+                
+                typeWriter();
 
-            } catch (err) {
-                output.innerHTML = "[!] КРИТИЧЕСКАЯ ОШИБКА: Сервер недоступен.\nПроверьте статус Render.com";
+            } catch (error) {
+                term.innerHTML = "[КРИТИЧЕСКАЯ ОШИБКА]\n\nНе удалось связаться с сервером.\n1. Проверьте статус Live на Render.\n2. Убедитесь, что EMAIL_USER и DB_URL настроены корректно.\n\n" + error;
+                document.getElementById('backBtn').style.display = 'block';
             }
         }
-
-        function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
     </script>
 </body>
 </html>
