@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SEARCHHEMS | OSINT</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono&display=swap');
+
+        body {
+            margin: 0; background: #020205; color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Переливающийся фон */
+        .bg-glow {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 50%, #101025 0%, #020205 100%);
+            z-index: -1;
+        }
+
+        header {
+            padding: 20px; background: rgba(0,0,0,0.8);
+            border-bottom: 1px solid #00f3ff;
+            display: flex; justify-content: space-between; align-items: center;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        }
+
+        .logo { color: #00f3ff; font-weight: bold; text-shadow: 0 0 10px #00f3ff; }
+
+        .card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(0,243,255,0.1);
+            border-radius: 12px; padding: 20px; margin: 15px;
+            transition: 0.3s;
+        }
+        .card:active { transform: scale(0.97); background: rgba(0,243,255,0.05); }
+        .card h3 { margin: 0 0 10px 0; color: #00f3ff; font-size: 1.1rem; }
+        .card p { margin: 0; color: #888; font-size: 0.85rem; line-height: 1.4; }
+
+        /* Окно отчета на весь экран */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 1000; flex-direction: column;
+        }
+        .modal.active { display: flex; }
+
+        .modal-header {
+            padding: 20px; border-bottom: 1px solid #333;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .terminal {
+            flex-grow: 1; padding: 20px; overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+            color: #00ff00; line-height: 1.6; background: #050508;
+        }
+
+        .btn-box { padding: 20px; border-top: 1px solid #333; display: flex; gap: 10px; }
+        .btn {
+            flex: 1; padding: 15px; border: none; border-radius: 8px;
+            font-family: 'Orbitron', sans-serif; font-weight: bold; font-size: 0.8rem;
+        }
+        .btn-blue { background: #00f3ff; color: #000; }
+        .btn-red { background: transparent; border: 1px solid #ff3366; color: #ff3366; }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    
+    <header>
+        <div class="logo">SEARCHHEMS v3.0</div>
+        <div onclick="openModal('regModal')" style="font-size: 1.5rem;">☰</div>
+    </header>
+
+    <main>
+        <div class="card" onclick="runSearch('ip')">
+            <h3>🌐 МОДУЛЬ: IP-ADRESS</h3>
+            <p>Глубокий анализ сети, провайдера и геолокации.</p>
+        </div>
+        <div class="card" onclick="runSearch('vk')">
+            <h3>🟦 МОДУЛЬ: VK.COM</h3>
+            <p>Поиск скрытых данных, связей и утечек по ID/Нику.</p>
+        </div>
+        <div class="card" onclick="runSearch('global')">
+            <h3>⚙️ ГЛОБАЛЬНЫЙ ПРОБИВ</h3>
+            <p>Поиск по всем соцсетям и базам DarkWeb данных.</p>
+        </div>
+    </main>
+
+    <div class="modal" id="reportModal">
+        <div class="modal-header">
+            <div style="color:#00f3ff">REPORT_GENERATOR</div>
+            <div onclick="closeModal('reportModal')" style="color:#ff3366">ЗАКРЫТЬ</div>
+        </div>
+        <div class="terminal" id="termOutput"></div>
+        <div class="btn-box">
+            <button class="btn btn-blue">СКАЧАТЬ PDF</button>
+            <button class="btn btn-red">JSON</button>
+        </div>
+    </div>
+
+    <div class="modal" id="regModal">
+        <div class="modal-header">
+            <div>РЕГИСТРАЦИЯ</div>
+            <div onclick="closeModal('regModal')">✕</div>
+        </div>
+        <div style="padding: 20px;">
+            <input type="text" placeholder="Логин" style="width:100%; padding:15px; margin-bottom:10px; background:#111; border:1px solid #333; color:#fff;">
+            <input type="text" placeholder="@username" style="width:100%; padding:15px; margin-bottom:20px; background:#111; border:1px solid #333; color:#fff;">
+            <button class="btn btn-blue" style="width:100%;">СОЗДАТЬ АККАУНТ</button>
+        </div>
+    </div>
+
+    <script>
+        // ТВОЯ ССЫЛКА ОТ RENDER!
+        const SERVER_URL = "https://proabajaaa.onrender.com";
+
+        async function runSearch(type) {
+            const query = prompt("Введите цель (Ник, IP или ID):");
+            if (!query) return;
+
+            openModal('reportModal');
+            const output = document.getElementById('termOutput');
+            output.innerHTML = "[SYS] Инициализация модулей...\n[SYS] Подключение к серверам OSINT...\n[SYS] Запуск поиска по цели: " + query + "\n\n";
+
+            try {
+                const response = await fetch(`${SERVER_URL}/api/search`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: type, query: query })
+                });
+                const data = await response.json();
+                
+                // Эффект печатающегося текста для крутости
+                let i = 0;
+                const text = data.report;
+                output.innerHTML = "";
+                const timer = setInterval(() => {
+                    output.innerHTML += text[i];
+                    i++;
+                    if (i >= text.length) clearInterval(timer);
+                    output.scrollTop = output.scrollHeight;
+                }, 5);
+
+            } catch (err) {
+                output.innerHTML = "[!] КРИТИЧЕСКАЯ ОШИБКА: Сервер недоступен.\nПроверьте статус Render.com";
+            }
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    </script>
+</body>
+</html>
