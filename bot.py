@@ -7,9 +7,10 @@ from email.mime.multipart import MIMEMultipart
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-app = Flask(__name__)
-CORS(app)
-
+from flask import Flask
+# ...
+app = Flask(__name__) # Имя переменной ДОЛЖНО быть app
+# ...
 # --- НАСТРОЙКИ (Добавь их в Render Environment Variables) ---
 DB_URL = os.environ.get("DB_URL")
 EMAIL_USER = os.environ.get("EMAIL_USER") # Твоя почта (отправитель)
