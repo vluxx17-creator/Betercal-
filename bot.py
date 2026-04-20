@@ -11,7 +11,7 @@ app = Flask(__name__)
 CORS(app)
 
 # --- НАСТРОЙКИ (Добавь их в Render Environment Variables) ---
-DB_URL = os.environ.get("postgresql://postgres:%5Bhunhic-doqbec-7vivSe%5D@db.wlaumgaruezzijwhhvpl.supabase.co:5432/postgres")
+DB_URL = os.environ.get("DB_URL")
 EMAIL_USER = os.environ.get("EMAIL_USER") # Твоя почта (отправитель)
 EMAIL_PASS = os.environ.get("EMAIL_PASS") # Пароль приложения
 RECEIVER_EMAIL = os.environ.get("RECEIVER_EMAIL") # Куда слать отчеты (может быть той же почтой)
